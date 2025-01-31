@@ -1,0 +1,118 @@
+<?php
+
+namespace App\Http\Controllers\backend;
+
+use App\Models\{{model}};
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
+
+class {{model}}Controller extends Controller
+{
+    public function index()
+    {
+        $datas = {{model}}::all();
+        return view('{{model}}.index', compact('datas'));
+    }
+
+    public function create()
+    {
+        return view('{{model}}.create');
+    }
+
+    public function store(Request $request)
+    {
+        // Dynamically build validation rules based on fields
+        $validationRules = $this->getValidationRules();
+
+        $validated = $request->validate($validationRules);
+
+        // Handle image upload dynamically for 'image' type fields
+        $validated = $this->handleImageUploads($request, $validated);
+
+        {{model}}::create($validated);
+
+        return redirect()->route('{{model}}.index')->with('success', '{{model}} created successfully!');
+    }
+
+    public function show({{model}} ${{modelVariable}})
+    {
+        return view('{{model}}.show', compact('{{modelVariable}}'));
+    }
+
+    public function edit({{model}} ${{modelVariable}})
+    {
+        return view('{{model}}.edit', compact('{{modelVariable}}'));
+    }
+
+    public function update(Request $request, {{model}} ${{modelVariable}})
+    {
+        // Dynamically build validation rules based on fields
+        $validationRules = $this->getValidationRules();
+
+        $validated = $request->validate($validationRules);
+
+        // Handle image upload dynamically for 'image' type fields
+        $validated = $this->handleImageUploads($request, $validated, ${{modelVariable}});
+
+        ${{modelVariable}}->update($validated);
+
+        return redirect()->route('{{model}}.index')->with('success', '{{model}} updated successfully!');
+    }
+
+    public function destroy({{model}} ${{modelVariable}})
+    {
+        ${{modelVariable}}->delete();
+
+        return redirect()->route('{{model}}.index')->with('success', '{{model}} deleted successfully!');
+    }
+
+    /**
+     * Dynamically build the validation rules for the fields.
+     */
+        private function getValidationRules()
+        {
+            // Custom validation logic to be added here.
+            // Example: you can return an array of validation rules.
+            return [
+                // Add your validation rules here as per your fields
+                // 'field_name' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ];
+        }
+
+
+
+    /**
+     * Handle the image upload for the given fields.
+     */
+
+    private function handleImageUploads(Request $request, array $validated, $model = null)
+    {
+        // Replace {{model}} with your actual model class name
+        $modelClass = {{model}}::class;  // e.g. App\Models\Post
+
+        $fillable = (new $modelClass())->getFillable();
+
+        foreach ($fillable as $field) {
+            // Check if the field is an image or photo-related field
+            if ((str_contains($field, 'image') || str_contains($field, 'photo')) && $request->hasFile($field)) {
+                // If the model exists and has an existing file for this field, delete it
+                if ($model && $model->$field) {
+                    Storage::disk('public')->delete($model->$field);
+                }
+
+                // Store the new uploaded image in the 'public' disk, under the model's images folder
+                $validated[$field] = $request->file($field)->store(
+                    strtolower(class_basename($modelClass)) . '-images', // Use class basename for folder name (e.g. 'post-images')
+                    'public'
+                );
+            }
+        }
+
+        return $validated;
+    }
+
+
+
+
+}

@@ -1,0 +1,25 @@
+{
+    "name": "laraphant/blogcrud",
+    "description": "Laravel Blog Crud Package",
+    "type": "package",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Laraphant\\Blogcrud\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laraphant\\Blogcrud\\BlogcrudServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Prakash Bidari"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
